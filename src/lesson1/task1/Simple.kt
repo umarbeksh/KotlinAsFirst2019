@@ -18,6 +18,7 @@ fun main() {
     val a = 3 * 3
     println(a)
 }
+
 /**
  * Пример
  *
@@ -75,7 +76,7 @@ fun seconds(hours: Int, minutes: Int, seconds: Int): Int = hours * 60 * 60 + min
  * 1 сажень = 3 аршина = 48 вершков, 1 вершок = 4.445 см.
  */
 fun lengthInMeters(sagenes: Int, arshins: Int, vershoks: Int): Double =
-    ( sagenes * 48 * 0.04445 ) + ( arshins * 16 * 0.04445 ) +  ( vershoks * 0.04445 )
+    (sagenes * 48 * 0.04445) + (arshins * 16 * 0.04445) + (vershoks * 0.04445)
 
 /**
  * Тривиальная
@@ -84,7 +85,7 @@ fun lengthInMeters(sagenes: Int, arshins: Int, vershoks: Int): Double =
  * Вывести значение того же угла в радианах (например, 0.63256).
  */
 fun angleInRadian(deg: Int, min: Int, sec: Int): Double =
-    deg * 3.1415926 / 180
+    ((deg * PI / 180) + (min / 3437.747) + (sec / 206264.8))
 
 /**
  * Тривиальная
@@ -93,7 +94,7 @@ fun angleInRadian(deg: Int, min: Int, sec: Int): Double =
  * Например, расстояние между (3, 0) и (0, 4) равно 5
  */
 fun trackLength(x1: Double, y1: Double, x2: Double, y2: Double): Double =
-    ( sqrt(x2 - x1) + sqrt(y2 - y1) )
+    sqrt(sqr(x2 - x1) + sqr(y2 - y1))
 
 /**
  * Простая
@@ -101,7 +102,7 @@ fun trackLength(x1: Double, y1: Double, x2: Double, y2: Double): Double =
  * Пользователь задает целое число, большее 100 (например, 3801).
  * Определить третью цифру справа в этом числе (в данном случае 8).
  */
-fun thirdDigit(number: Int): Int = TODO()
+fun thirdDigit(number: Int): Int = number / 100 % 10
 
 /**
  * Простая
@@ -111,7 +112,7 @@ fun thirdDigit(number: Int): Int = TODO()
  * Определите время поезда в пути в минутах (в данном случае 216).
  */
 fun travelMinutes(hoursDepart: Int, minutesDepart: Int, hoursArrive: Int, minutesArrive: Int): Int =
-    ( (hoursArrive * 60 + minutesArrive) - (hoursDepart * 60 + minutesDepart) )
+    ((hoursArrive * 60 + minutesArrive) - (hoursDepart * 60 + minutesDepart))
 /**
  * Простая
  *
