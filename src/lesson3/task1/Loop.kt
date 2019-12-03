@@ -3,6 +3,8 @@
 package lesson3.task1
 
 import lesson1.task1.sqr
+import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -208,7 +210,25 @@ fun collatzSteps(x: Int): Int {
  * Подумайте, как добиться более быстрой сходимости ряда при больших значениях x.
  * Использовать kotlin.math.sin и другие стандартные реализации функции синуса в этой задаче запрещается.
  */
-fun sin(x: Double, eps: Double): Double = TODO()
+fun sin(x: Double, eps: Double): Double {
+    var res = 0.0
+    var count = 1
+    var num = abs(x) % (2 * PI)
+    if (x < 0) num *= -1
+    val sqrX = num * num
+    var value = num
+    var fact = 1.0
+    var mark = 1
+    while (abs(value) >= eps) {
+        res += value * mark
+        mark *= -1
+        count += 2
+        num *= sqrX
+        fact *= count * (count - 1)
+        value = num / fact
+    }
+    return res
+}
 
 /**
  * Средняя
@@ -219,7 +239,26 @@ fun sin(x: Double, eps: Double): Double = TODO()
  * Подумайте, как добиться более быстрой сходимости ряда при больших значениях x.
  * Использовать kotlin.math.cos и другие стандартные реализации функции косинуса в этой задаче запрещается.
  */
-fun cos(x: Double, eps: Double): Double = TODO()
+fun cos(x: Double, eps: Double): Double {
+    var res = 0.0
+    var count = 0
+    var num = abs(x) % (2 * PI)
+    if (x < 0) num *= -1
+    val sqrX = num * num
+    num = 1.0
+    var value = num
+    var fact = 1.0
+    var mark = 1
+    while (abs(value) >= eps) {
+        res += value * mark
+        mark *= -1
+        count += 2
+        num *= sqrX
+        fact *= count * (count - 1)
+        value = num / fact
+    }
+    return res
+}
 
 /**
  * Средняя
