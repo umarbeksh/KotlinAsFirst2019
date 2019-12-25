@@ -229,8 +229,15 @@ fun factorizeToString(n: Int): MutableList<Int> {
  * Результат перевода вернуть в виде списка цифр в base-ичной системе от старшей к младшей,
  * например: n = 100, base = 4 -> (1, 2, 1, 0) или n = 250, base = 14 -> (1, 3, 12)
  */
-fun convert(n: Int, base: Int): List<Int> = TODO()
-
+fun convert(n: Int, base: Int): List<Int> {
+    var num = n
+    val list = mutableListOf<Int>()
+    do {
+        list.add(0, num % base)
+        num /= base
+    } while (num > 0)
+    return list
+}
 /**
  * Сложная
  *
@@ -242,8 +249,13 @@ fun convert(n: Int, base: Int): List<Int> = TODO()
  * Использовать функции стандартной библиотеки, напрямую и полностью решающие данную задачу
  * (например, n.toString(base) и подобные), запрещается.
  */
-fun convertToString(n: Int, base: Int): String = TODO()
-
+fun convertToString(n: Int, base: Int): String {
+    val alf = "abcdefghijklmnopqrstuvwxyz"
+    return convert(n, base).joinToString(
+        separator = "",
+        transform = { if (it < 10) "$it" else alf[it - 10].toString() }
+    )
+}
 /**
  * Средняя
  *
@@ -273,7 +285,12 @@ fun decimal(digits: List<Int>, base: Int): Int {
  * Использовать функции стандартной библиотеки, напрямую и полностью решающие данную задачу
  * (например, str.toInt(base)), запрещается.
  */
-fun decimalFromString(str: String, base: Int): Int = TODO()
+fun decimalFromString(str: String, base: Int): Int {
+    val alf = "abcdefghijklmnopqrstuvwxyz"
+    val list = mutableListOf<Int>()
+    for (char in str) list.add(if (char in alf) char - 'a' + 10 else char - '0')
+    return decimal(list, base)
+}
 
 /**
  * Сложная
@@ -283,7 +300,34 @@ fun decimalFromString(str: String, base: Int): Int = TODO()
  * 90 = XC, 100 = C, 400 = CD, 500 = D, 900 = CM, 1000 = M.
  * Например: 23 = XXIII, 44 = XLIV, 100 = C
  */
-fun roman(n: Int): String = TODO()
+fun roman(n: Int): String {
+    val list = mutableListOf<String>()
+    var num = n
+    var exc = 0
+    while (num > 0) {
+        exc++
+        val c = when (exc) {
+            1 -> listOf("I", "V", "X")
+            2 -> listOf("X", "L", "C")
+            3 -> listOf("C", "D", "M")
+            else -> listOf("M")
+        }
+        val digit = num % 10
+        num /= 10
+        list.add(
+            0,
+            when {
+                exc > 3 -> c[0].repeat(digit)
+                digit in 1..3 -> c[0].repeat(digit)
+                digit in 4..5 -> c[0].repeat(5 - digit) + c[1]
+                digit in 6..8 -> c[1] + c[0].repeat(digit - 5)
+                digit == 9 -> c[0].repeat(10 - digit) + c[2]
+                else -> ""
+            }
+        )
+    }
+    return list.joinToString(separator = "")
+}
 
 /**
  * Очень сложная
