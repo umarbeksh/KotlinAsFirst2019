@@ -169,7 +169,34 @@ fun centerFile(inputName: String, outputName: String) {
  * 8) Если входной файл удовлетворяет требованиям 1-7, то он должен быть в точности идентичен выходному файлу
  */
 fun alignFileByWidth(inputName: String, outputName: String) {
-    TODO()
+    val text = mutableListOf<List<String>>()
+    val lenghtLines = mutableListOf<Int>()
+    var maxLen = 0
+    for (line in File(inputName).readLines()) {
+        val res = line.trim().split(" ").filter { it != "" }
+        var lenWords = res.fold(0) { preview, it -> preview + it.length }
+        if (lenWords != 0) lenWords += (res.size - 1)
+        lenghtLines.add(lenWords)
+        maxLen = max(maxLen, lenWords)
+        if (res.isEmpty()) text.add(listOf("")) else text.add(res)
+    }
+    File(outputName).bufferedWriter().use {
+        for ((index, line) in text.withIndex()) {
+            if (line.size == 1) {
+                it.write(line[0] + "\n")
+                continue
+            }
+            val dif = maxLen - lenghtLines[index]
+            val countPosSpaces = line.size - 1
+            val divSpaces = dif / countPosSpaces
+            var modSpaces = dif % countPosSpaces
+            for (i in 0..line.size - 2) {
+                it.write(line[i] + " ".repeat(divSpaces + 1 + if (modSpaces > 0) 1 else 0))
+                modSpaces--
+            }
+            it.write(line.last() + "\n")
+        }
+    }
 }
 
 /**
@@ -234,7 +261,14 @@ fun top20Words(inputName: String): Map<String, Int> {
  * Обратите внимание: данная функция не имеет возвращаемого значения
  */
 fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: String) {
-    TODO()
+    val newDictionary = mutableMapOf<Char, String>()
+    for ((key, value) in dictionary) newDictionary[key.toLowerCase()] = value.toLowerCase()
+    File(outputName).bufferedWriter().use {
+        for (char in File(inputName).readText()) {
+            val changeString = newDictionary[char.toLowerCase()] ?: char.toString()
+            it.write(if (char.isUpperCase()) changeString.capitalize() else changeString)
+        }
+    }
 }
 
 /**
@@ -262,7 +296,19 @@ fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: 
  * Обратите внимание: данная функция не имеет возвращаемого значения
  */
 fun chooseLongestChaoticWord(inputName: String, outputName: String) {
-    TODO()
+    val res = mutableListOf<String>()
+    var maxLen = 0
+    for (line in File(inputName).readLines()) {
+        val str = line.toLowerCase()
+        if (str.toSet().size == str.length) {
+            if (str.length > maxLen) {
+                maxLen = str.length
+                res.clear()
+                res.add(line)
+            } else if (str.length == maxLen) res.add(line)
+        }
+    }
+    File(outputName).bufferedWriter().use { it.write(res.joinToString(", ")) }
 }
 
 /**
@@ -311,8 +357,53 @@ Suspendisse ~~et elit in enim tempus iaculis~~.
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
-    TODO()
+    val text = File(inputName).readText().replace("\r", "").trim('\n')
+    val textList = mutableListOf("<html><body>", "<p>")
+    val map = mutableMapOf("**" to null, "*" to null, "~~" to null, "\n\n" to 1)
+    var indexOfBeginString = 0
+    var i = 0
+    fun checkMarkToHTML(mark: String, tags: Pair<String, String>): Boolean {
+        if (text[i] == mark[0]) {
+            var di = i
+            if (mark.length == 2) if (di < text.length - 1 && text[di + 1] == mark[1]) di += 1 else return false
+            if (mark == "\n\n") while (di < text.length - 1 && text[di + 1] == '\n') di += 1
+            if (i - indexOfBeginString != 0) textList.add(text.substring(indexOfBeginString, i))
+            i = di
+            indexOfBeginString = i + 1
+            if (map[mark] == null) {
+                map[mark] = textList.size
+                textList.add(mark)
+            } else {
+                textList.add(tags.second)
+                textList[map[mark]!!] = tags.first
+                map[mark] = null
+                if (mark == "\n\n") {
+                    map[mark] = textList.size
+                    textList.add("\n\n")
+                }
+            }
+            return true
+        }
+        return false
+    }
+    while (i < text.length) {
+        var flag = checkMarkToHTML("**", "<b>" to "</b>")
+        if (!flag) flag = checkMarkToHTML("*", "<i>" to "</i>")
+        if (!flag) flag = checkMarkToHTML("~~", "<s>" to "</s>")
+        if (!flag) checkMarkToHTML("\n\n", "<p>" to "</p>")
+        i += 1
+    }
+    textList.add(text.substring(indexOfBeginString, i))
+    val lastP = map["\n\n"]
+    if (lastP != null) {
+        textList[lastP] = "<p>"
+        textList.add("</p>")
+    }
+    textList.add("</body></html>")
+    val res = textList.joinToString(separator = "")
+    File(outputName).bufferedWriter().use { it.write(res) }
 }
+
 
 /**
  * Сложная
