@@ -72,17 +72,15 @@ fun digitCountInNumber(n: Int, m: Int): Int =
  * Использовать операции со строками в этой задаче запрещается.
  */
 fun digitNumber(n: Int): Int {
-    var r = 0
-    var p = n
-    if (p < 0)
-        p = -p
-    do {
-        p /= 10
-        r++
-    } while (p > 0)
-    return r
+    var count = 0
+    var number = abs(n)
+    if (number == 0) return 1
+    while (number > 0) {
+        number /= 10
+        count++
+    }
+    return count
 }
-
 
 /**
  * Простая
@@ -91,19 +89,15 @@ fun digitNumber(n: Int): Int {
  * Ряд Фибоначчи определён следующим образом: fib(1) = 1, fib(2) = 1, fib(n+2) = fib(n) + fib(n+1)
  */
 fun fib(n: Int): Int {
-    var a = 1
-    var b = 1
-    var i = 1
-    var c = 0
-    if (n == 1) return 1
-    if (n == 2) return 1
-    while (i <= n - 3) {
-        c = b
-        b += a
-        a = c
-        i++
+    var f1 = 1
+    var f2 = 1
+    var f = 1
+    for (i in 3..n) {
+        f = f1 + f2
+        f2 = f1
+        f1 = f
     }
-    return a + b
+    return f
 }
 
 /**
@@ -140,10 +134,14 @@ fun minDivisor(n: Int): Int {
  * Для заданного числа n > 1 найти максимальный делитель, меньший n
  */
 fun maxDivisor(n: Int): Int {
-    if (isPrime(n)) return 1
-    for (i in n - 1 downTo sqrt(n.toDouble()).toInt())
-        if (n % i.toDouble() == 0.0) return i
-    return 1
+    var a = n
+    for (i in 2..sqrt(n.toDouble()).toInt()) {
+        if (n % i == 0) {
+            a = i
+            break
+        }
+    }
+    return a
 }
 
 
@@ -191,13 +189,14 @@ fun squareBetweenExists(m: Int, n: Int): Boolean = m <= sqr((sqrt(n.toDouble()))
  * этого для какого-либо начального X > 0.
  */
 fun collatzSteps(x: Int): Int {
-    var steps = 0
-    var number = x
-    while (number != 1) {
-        if (number % 2.0 == 0.0) number /= 2 else number = 3 * number + 1
-        steps++
+    var c = x
+    var count = 0
+    while (c != 1) {
+        count++
+        if (c % 2 == 0) c /= 2
+        else c = 3 * c + 1
     }
-    return steps
+    return count
 }
 
 
