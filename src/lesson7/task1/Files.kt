@@ -2,6 +2,8 @@
 
 package lesson7.task1
 
+import lesson3.task1.digitNumber
+import lesson3.task1.revert
 import java.io.File
 import java.lang.Math.max
 
@@ -316,6 +318,176 @@ fun chooseLongestChaoticWord(inputName: String, outputName: String) {
  *
  * Реализовать транслитерацию текста в заданном формате разметки в формат разметки HTML.
  *
+ * Во входном файле с именем inputName содержится текст, содержащий в себе набор вложенных друг в друга списков.
+ * Списки бывают двух типов: нумерованные и ненумерованные.
+ *
+ * Каждый элемент ненумерованного списка начинается с новой строки и символа '*', каждый элемент нумерованного списка --
+ * с новой строки, числа и точки. Каждый элемент вложенного списка начинается с отступа из пробелов, на 4 пробела большего,
+ * чем список-родитель. Максимально глубина вложенности списков может достигать 6. "Верхние" списки файла начинются
+ * прямо с начала строки.
+ *
+ * Следует вывести этот же текст в выходной файл в формате HTML:
+ * Нумерованный список:
+ * <ol>
+ *     <li>Раз</li>
+ *     <li>Два</li>
+ *     <li>Три</li>
+ * </ol>
+ *
+ * Ненумерованный список:
+ * <ul>
+ *     <li>Раз</li>
+ *     <li>Два</li>
+ *     <li>Три</li>
+ * </ul>
+ *
+ * Кроме того, весь текст целиком следует обернуть в теги <html><body>...</body></html>
+ *
+ * Все остальные части исходного текста должны остаться неизменными с точностью до наборов пробелов и переносов строк.
+ *
+ * Пример входного файла:
+///////////////////////////////начало файла/////////////////////////////////////////////////////////////////////////////
+ * Утка по-пекински
+ * Утка
+ * Соус
+ * Салат Оливье
+1. Мясо
+ * Или колбаса
+2. Майонез
+3. Картофель
+4. Что-то там ещё
+ * Помидоры
+ * Фрукты
+1. Бананы
+23. Яблоки
+1. Красные
+2. Зелёные
+///////////////////////////////конец файла//////////////////////////////////////////////////////////////////////////////
+ *
+ *
+ * Соответствующий выходной файл:
+///////////////////////////////начало файла/////////////////////////////////////////////////////////////////////////////
+<html>
+<body>
+<ul>
+<li>
+Утка по-пекински
+<ul>
+<li>Утка</li>
+<li>Соус</li>
+</ul>
+</li>
+<li>
+Салат Оливье
+<ol>
+<li>Мясо
+<ul>
+<li>
+Или колбаса
+</li>
+</ul>
+</li>
+<li>Майонез</li>
+<li>Картофель</li>
+<li>Что-то там ещё</li>
+</ol>
+</li>
+<li>Помидоры</li>
+<li>
+Фрукты
+<ol>
+<li>Бананы</li>
+<li>
+Яблоки
+<ol>
+<li>Красные</li>
+<li>Зелёные</li>
+</ol>
+</li>
+</ol>
+</li>
+</ul>
+</body>
+</html>
+///////////////////////////////конец файла//////////////////////////////////////////////////////////////////////////////
+ * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
+ */
+fun markdownToHtmlLists(inputName: String, outputName: String) {
+    File(outputName).bufferedWriter().use {
+        var level = 0
+        val stack = mutableListOf<String>()
+        fun abort() {
+            while (stack.isNotEmpty()) {
+                it.write("</li>")
+                it.write("</" + stack.last() + ">")
+                stack.removeAt(stack.size - 1)
+                level = 0
+            }
+        }
+        it.write("<html><body>")
+        for (line in File(inputName).readLines()) {
+            when {
+                line.matches(Regex("""^""" + " ".repeat(4 * level) + """\d+\..*""")) -> {
+                    stack.add("ol")
+                    it.write("<ol>")
+                    it.write("<li>")
+                    it.write(line.replaceFirst(Regex("""\s*\d+."""), ""))
+                    level++
+                }
+                line.matches(Regex("""^""" + " ".repeat(4 * level) + """\*.*""")) -> {
+                    stack.add("ul")
+                    it.write("<ul>")
+                    it.write("<li>")
+                    it.write(line.replaceFirst(Regex("""\s*\*"""), ""))
+                    level++
+                }
+                else -> {
+                    var trigger = true
+                    while (level > 0 && trigger) {
+                        it.write("</li>")
+                        when {
+                            line.matches(Regex("""^""" + " ".repeat(4 * (level - 1)) + """\d+\..*""")) -> {
+                                if (stack.last() == "ol") {
+                                    it.write("<li>")
+                                    it.write(line.replaceFirst(Regex("""\s*\d+."""), ""))
+                                    trigger = false
+                                } else {
+                                    abort()
+                                    it.write(line)
+                                }
+                            }
+                            line.matches(Regex("""^""" + " ".repeat(4 * (level - 1)) + """\*.*""")) -> {
+                                if (stack.last() == "ul") {
+                                    it.write("<li>")
+                                    it.write(line.replaceFirst(Regex("""\s*\*"""), ""))
+                                    trigger = false
+                                } else {
+                                    abort()
+                                    it.write(line)
+                                }
+                            }
+                            else -> {
+                                it.write("</" + stack.last() + ">")
+                                stack.removeAt(stack.size - 1)
+                                level--
+                            }
+                        }
+                    }
+                    if (level == 0) it.write(line)
+                    it.newLine()
+                }
+            }
+        }
+        abort()
+        it.write("</body></html>")
+    }
+}
+
+/**
+ * Сложная
+ *
+ * Реализовать транслитерацию текста в заданном формате разметки в формат разметки HTML.
+ *
  * Во входном файле с именем inputName содержится текст, содержащий в себе элементы текстовой разметки следующих типов:
  * - *текст в курсивном начертании* -- курсив
  * - **текст в полужирном начертании** -- полужирный
@@ -404,110 +576,6 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
     File(outputName).bufferedWriter().use { it.write(res) }
 }
 
-
-/**
- * Сложная
- *
- * Реализовать транслитерацию текста в заданном формате разметки в формат разметки HTML.
- *
- * Во входном файле с именем inputName содержится текст, содержащий в себе набор вложенных друг в друга списков.
- * Списки бывают двух типов: нумерованные и ненумерованные.
- *
- * Каждый элемент ненумерованного списка начинается с новой строки и символа '*', каждый элемент нумерованного списка --
- * с новой строки, числа и точки. Каждый элемент вложенного списка начинается с отступа из пробелов, на 4 пробела большего,
- * чем список-родитель. Максимально глубина вложенности списков может достигать 6. "Верхние" списки файла начинются
- * прямо с начала строки.
- *
- * Следует вывести этот же текст в выходной файл в формате HTML:
- * Нумерованный список:
- * <ol>
- *     <li>Раз</li>
- *     <li>Два</li>
- *     <li>Три</li>
- * </ol>
- *
- * Ненумерованный список:
- * <ul>
- *     <li>Раз</li>
- *     <li>Два</li>
- *     <li>Три</li>
- * </ul>
- *
- * Кроме того, весь текст целиком следует обернуть в теги <html><body>...</body></html>
- *
- * Все остальные части исходного текста должны остаться неизменными с точностью до наборов пробелов и переносов строк.
- *
- * Пример входного файла:
-///////////////////////////////начало файла/////////////////////////////////////////////////////////////////////////////
-* Утка по-пекински
-    * Утка
-    * Соус
-* Салат Оливье
-    1. Мясо
-        * Или колбаса
-    2. Майонез
-    3. Картофель
-    4. Что-то там ещё
-* Помидоры
-* Фрукты
-    1. Бананы
-    23. Яблоки
-        1. Красные
-        2. Зелёные
-///////////////////////////////конец файла//////////////////////////////////////////////////////////////////////////////
- *
- *
- * Соответствующий выходной файл:
-///////////////////////////////начало файла/////////////////////////////////////////////////////////////////////////////
-<html>
-  <body>
-    <ul>
-      <li>
-        Утка по-пекински
-        <ul>
-          <li>Утка</li>
-          <li>Соус</li>
-        </ul>
-      </li>
-      <li>
-        Салат Оливье
-        <ol>
-          <li>Мясо
-            <ul>
-              <li>
-                  Или колбаса
-              </li>
-            </ul>
-          </li>
-          <li>Майонез</li>
-          <li>Картофель</li>
-          <li>Что-то там ещё</li>
-        </ol>
-      </li>
-      <li>Помидоры</li>
-      <li>
-        Фрукты
-        <ol>
-          <li>Бананы</li>
-          <li>
-            Яблоки
-            <ol>
-              <li>Красные</li>
-              <li>Зелёные</li>
-            </ol>
-          </li>
-        </ol>
-      </li>
-    </ul>
-  </body>
-</html>
-///////////////////////////////конец файла//////////////////////////////////////////////////////////////////////////////
- * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
- */
-fun markdownToHtmlLists(inputName: String, outputName: String) {
-    TODO()
-}
-
 /**
  * Очень сложная
  *
@@ -546,7 +614,33 @@ fun markdownToHtml(inputName: String, outputName: String) {
  *
  */
 fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
-    TODO()
+    var number = rhv
+    val answer = (lhv * rhv).toString()
+    val length = answer.length
+    File(outputName).bufferedWriter().use {
+        it.write(lhv.toString().padStart(length + 1))
+        it.newLine()
+        it.write("*" + rhv.toString().padStart(length))
+        it.newLine()
+        repeat(length + 1) { _ -> it.write("-") }
+        var i = 0
+        while (number != 0) {
+            it.newLine()
+            val num = (number % 10 * lhv).toString()
+            if (i > 0) {
+                it.write("+")
+            }
+            if (i == 1) i++
+            repeat(length - num.length + 1 - i) { _ -> it.write(" ") }
+            it.write(num)
+            number /= 10
+            i++
+        }
+        it.newLine()
+        repeat(length + 1) { _ -> it.write("-") }
+        it.newLine()
+        it.write(answer.padStart(length + 1))
+    }
 }
 
 
@@ -571,6 +665,57 @@ fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
  *
  */
 fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
-    TODO()
-}
 
+    var currentNum = 0
+    var reversed = revert(lhv)
+    val steps = mutableListOf<Int>()
+    for (i in 0 until digitNumber(lhv)) {
+        currentNum = 10 * currentNum + reversed % 10
+        reversed /= 10
+        steps.add(currentNum)
+        steps.add(currentNum - currentNum % rhv)
+        currentNum %= rhv
+    }
+
+    val pairs = if (steps.chunked(2).any { it[1] != 0 }) {
+        steps.chunked(2).drop(steps.chunked(2).indexOfFirst { it[1] != 0 })
+    } else listOf(listOf(lhv, 0))
+
+    File(outputName).bufferedWriter().use {
+
+        val diff = if (digitNumber(pairs[0][0]) > digitNumber(pairs[0][1])) 1 else 0
+        it.write(" ".repeat(1 - diff) + "$lhv | $rhv\n")
+        var len = maxOf(digitNumber(pairs[0][1]) + 1, digitNumber(pairs[0][0]))
+        it.write(
+            " ".repeat(len - digitNumber(pairs[0][1]) - 1) + '-' + pairs[0][1].toString() + " ".repeat(
+                digitNumber(
+                    lhv
+                ) + 4 - len - diff
+            ) + lhv / rhv
+        )
+        it.newLine()
+        it.write("-".repeat(len))
+        it.newLine()
+
+        var isModZero = pairs[0][0] == pairs[0][1]
+        var defaultSpaces = len
+        for (pair in pairs.drop(1)) {
+
+            defaultSpaces++
+            if (isModZero) it.write(" ".repeat(defaultSpaces - digitNumber(pair[0]) - 1) + '0' + pair[0].toString())
+            else it.write(" ".repeat(defaultSpaces - digitNumber(pair[0])) + pair[0].toString())
+            it.newLine()
+
+            it.write(" ".repeat(defaultSpaces - digitNumber(pair[1]) - 1) + '-' + pair[1].toString())
+            it.newLine()
+
+            len = maxOf(digitNumber(pair[1]) + 1, digitNumber(pair[0]))
+            it.write(" ".repeat(defaultSpaces - len) + "-".repeat(len))
+            it.newLine()
+
+            isModZero = pair[0] == pair[1]
+        }
+        val mod = lhv % rhv
+        it.write(" ".repeat(defaultSpaces - digitNumber(mod)) + mod.toString())
+    }
+}

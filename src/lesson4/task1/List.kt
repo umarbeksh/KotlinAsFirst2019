@@ -208,19 +208,7 @@ fun factorize(n: Int): List<Int> {
  * Результат разложения вернуть в виде строки, например 75 -> 3*5*5
  * Множители в результирующей строке должны располагаться по возрастанию.
  */
-fun factorizeToString(n: Int): MutableList<Int> {
-    var factor = 2
-    var num = n
-    val list = mutableListOf<Int>()
-    while (num > 1) {
-        while (num % factor == 0) {
-            list.add(factor)
-            num /= factor
-        }
-        factor++
-    }
-    return list
-}
+fun factorizeToString(n: Int): String = factorize(n).joinToString("*")
 
 /**
  * Средняя
